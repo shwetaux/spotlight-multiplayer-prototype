@@ -420,6 +420,12 @@ spotlightBtn.addEventListener('click', (e) => {
   spotlightBtn.classList.remove('pulse');
   panel ? closePanel() : openPanel();
 });
+document.addEventListener('mousedown', (e) => {
+  if (!panel) return;
+  if (panel.contains(e.target)) return;
+  if (spotlightBtn.contains(e.target)) return;
+  closePanel();
+});
 
 // ============== NODE SELECTION HELPERS ==============
 function selectNodeByUser(nodeId, user) {
