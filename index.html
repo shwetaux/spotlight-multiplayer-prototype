@@ -407,6 +407,14 @@
     background:#f3edff; color:#5a3aaa; text-transform:none; letter-spacing:0;
     font-weight:600;
   }
+  .named-pill .named-ver {
+    display:inline-flex; align-items:center;
+    background:#5a3aaa; color:#fff;
+    padding:1px 5px; border-radius:6px;
+    font-size:9px; font-weight:700;
+    margin-right:5px; letter-spacing:.3px;
+    text-transform:uppercase;
+  }
   .history-subheader {
     padding:8px 16px 10px;
     font-size:11px; color:#8a8a8a;
@@ -1102,12 +1110,12 @@ const versionHistory = [
     { time:'1:30 PM',  desc:'LIFO traced 12 hops from Coinbase deposit',                     actor:'automation', actorId:'you' },
     { time:'11:30 AM', desc:'Summarized fund flow into Helix Mixer',                         actor:'llm',        actorId:'you',  chat:true },
     { time:'10:48 AM', desc:'2 clusters attributed to Binance Hot Wallet 14',                actor:'data' },
-    { time:'9:12 AM',  desc:'Added 4 wallets to "Suspect cluster A"',                        actor:'user',       actorId:'tom',  named:'Before adding cluster A' },
+    { time:'9:12 AM',  desc:'Added 4 wallets to "Suspect cluster A"',                        actor:'user',       actorId:'tom',  named:'Before adding cluster A', version:'v2' },
     { time:'8:04 AM',  desc:'Auto-saved layout changes',                                     actor:'user',       actorId:'you',  autoSaved:true },
   ]},
   { group:'Yesterday', items: [
     { time:'6:14 PM',  desc:'Renamed "Helix Mixer" terminal node',                           actor:'user',       actorId:'adam' },
-    { time:'4:32 PM',  desc:'Tagged 6 counterparties as "High risk"',                        actor:'user',       actorId:'sara', named:'Pre-attorney review' },
+    { time:'4:32 PM',  desc:'Tagged 6 counterparties as "High risk"',                        actor:'user',       actorId:'sara', named:'Pre-attorney review', version:'v3' },
     { time:'3:10 PM',  desc:'Drafted narrative: "Peel chain pattern detected"',              actor:'llm',        actorId:'you',  chat:true },
     { time:'1:48 PM',  desc:'Peel chain workflow expanded 8 outbound hops',                  actor:'automation', actorId:'mike' },
     { time:'11:08 AM', desc:'Refreshed balances for 27 addresses',                           actor:'data' },
@@ -1132,7 +1140,7 @@ const versionHistory = [
     { time:'8:15 AM', desc:'Sync workflow refreshed 1,204 tx records',                       actor:'automation' },
     { time:'7:02 AM', desc:'Generated executive summary of investigation',                   actor:'llm' },
     { time:'6:18 AM', desc:'2 clusters attributed to Bitfinex Hot Wallet',                   actor:'data' },
-    { time:'5:00 AM', desc:'Initial save — investigation "Operation Sundial" created',      actor:'user',       actorId:'you',  named:'Initial' },
+    { time:'5:00 AM', desc:'Initial save — investigation "Operation Sundial" created',      actor:'user',       actorId:'you',  named:'Initial', version:'v1' },
   ]},
 ];
 
@@ -1282,7 +1290,7 @@ function renderHistoryBody() {
       // Content
       const content = document.createElement('div');
       content.className = 'item-content';
-      const namedPill = it.named ? `<span class="kind-pill named-pill" title="Named version">★ ${escapeHtml(it.named)}</span>` : '';
+      const namedPill = it.named ? `<span class="kind-pill named-pill" title="Named version">★ <span class="named-ver">${escapeHtml(it.version || '')}</span>${escapeHtml(it.named)}</span>` : '';
       content.innerHTML = `
         <div class="item-time-row">
           <span class="item-time">${it.time}</span>
