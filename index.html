@@ -150,14 +150,13 @@
   .filter-option.selected .opt-check { opacity:1; }
   .filter-option .opt-check svg { width:14px; height:14px; }
   .filter-menu-divider { height:1px; background:var(--border); margin:6px 0; }
-  .history-body {
-    flex:1; overflow-y:auto; padding-bottom:8px;
+  .history-body { flex:1; overflow-y:auto; padding-bottom:8px; }
+  .history-groups {
     /* Vertical timeline line through chevron + avatar column (center at 36px from left) */
     background-image: linear-gradient(#e3e3e3, #e3e3e3);
     background-repeat: no-repeat;
-    background-attachment: local;
     background-position: 35px 24px;
-    background-size: 1.5px calc(100% - 48px);
+    background-size: 1.5px calc(100% - 40px);
   }
   .history-group { padding:4px 0; position:relative; }
   .history-group-header {
@@ -1005,6 +1004,9 @@ function renderHistoryBody() {
     body.innerHTML = '<div style="padding:32px 16px;text-align:center;color:#8a8a8a;font-size:13px;">No versions match this filter</div>';
     return;
   }
+  const groupsWrap = document.createElement('div');
+  groupsWrap.className = 'history-groups';
+  body.appendChild(groupsWrap);
   data.forEach(grp => {
     const isCollapsed = collapsedGroups.has(grp.group);
     const g = document.createElement('div');
@@ -1112,7 +1114,7 @@ function renderHistoryBody() {
       itemsContainer.appendChild(item);
     });
 
-    body.appendChild(g);
+    groupsWrap.appendChild(g);
   });
 
   // Show older link
