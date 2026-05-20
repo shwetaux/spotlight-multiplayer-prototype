@@ -45,7 +45,7 @@
   .avatar { width:26px; height:26px; border-radius:50%; border:2px solid #fff; margin-left:-6px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:600; cursor:pointer; position:relative; transition:transform .2s, opacity .3s; background-size:cover; background-position:center; overflow:hidden; }
   .avatar:first-child { margin-left:0; }
   .avatar:hover { transform:translateY(-2px); z-index:5; }
-  .avatar.live::after { content:''; position:absolute; bottom:-1px; right:-1px; width:8px; height:8px; background:#10b981; border:2px solid #fff; border-radius:50%; }
+  .avatar.live::after { content:none; }
   .avatar.entering { animation:avatarIn .35s ease-out; }
   @keyframes avatarIn { from { opacity:0; transform:scale(0.5); } to { opacity:1; transform:scale(1); } }
 
