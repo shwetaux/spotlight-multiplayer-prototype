@@ -277,7 +277,10 @@
   .history-group:not(.collapsed) .group-chevron svg { transform:rotate(0); transition:transform .2s; }
   .group-title { flex:1; font-size:15px; font-weight:600; color:#1a1a1a; }
   .group-meta { font-size:13px; color:var(--muted); }
-  .group-current-badge { font-size:12px; background:#f2f2f2; color:#5a5a5a; padding:4px 10px; border-radius:14px; font-weight:500; }
+  .group-current-badge { font-size:12px; background:#f2f2f2; color:#5a5a5a; padding:4px 10px; border-radius:14px; font-weight:500; cursor:pointer; transition:background .12s, color .12s; }
+  .group-current-badge:hover { background:#1a1a1a; color:#fff; }
+  .history-item.flash-current { animation:flashCurrent 1.2s ease-out; }
+  @keyframes flashCurrent { 0% { background:#fff3e6; } 100% { background:transparent; } }
   .history-items { padding:0 0 8px; }
   .history-group.collapsed .history-items { display:none; }
 
@@ -1196,7 +1199,7 @@ function renderHistoryBody() {
     const isCollapsed = collapsedGroups.has(grp.group);
     const g = document.createElement('div');
     g.className = 'history-group' + (isCollapsed ? ' collapsed' : '');
-    const rightMeta = grp.current ? `<div class="group-current-badge">Current version</div>` : `<div class="group-meta">${grp.items.length} versions</div>`;
+    const rightMeta = grp.current ? `<div class="group-current-badge" data-current="1" title="Jump to current version">Current version</div>` : `<div class="group-meta">${grp.items.length} versions</div>`;
     g.innerHTML = `
       <div class="history-group-header">
         <div class="group-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
@@ -1205,11 +1208,28 @@ function renderHistoryBody() {
       </div>
       <div class="history-items"></div>
     `;
-    g.querySelector('.history-group-header').addEventListener('click', () => {
+    g.querySelector('.history-group-header').addEventListener('click', (e) => {
+      if (e.target.closest('[data-current]')) return;
       if (collapsedGroups.has(grp.group)) collapsedGroups.delete(grp.group);
       else collapsedGroups.add(grp.group);
       renderHistoryBody();
     });
+    const currentBadge = g.querySelector('[data-current]');
+    if (currentBadge) {
+      currentBadge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (viewingVersion) exitReadOnlyMode();
+        const firstCurrent = grp.items.find(i => i.current) || grp.items[0];
+        if (firstCurrent) {
+          const itemEl = itemsContainer.querySelector('.history-item');
+          if (itemEl) {
+            itemEl.classList.add('flash-current');
+            itemEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => itemEl.classList.remove('flash-current'), 1200);
+          }
+        }
+      });
+    }
 
     const itemsContainer = g.querySelector('.history-items');
     grp.items.forEach(it => {
