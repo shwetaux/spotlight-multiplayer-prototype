@@ -306,6 +306,83 @@
   .item-menu-btn:hover, .item-ai-btn:hover { background:#eaeaea; color:#1a1a1a; }
   .item-menu-btn svg, .item-ai-btn svg { width:16px; height:16px; }
 
+  /* Summary panel (replaces history list inside the drawer) */
+  .history-back {
+    background:transparent; border:none; cursor:pointer;
+    width:28px; height:28px; border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    color:#1a1a1a;
+  }
+  .history-back:hover { background:#f2f2f2; }
+  .history-back svg { width:18px; height:18px; }
+  .summary-head-icon {
+    width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+    color:#1a1a1a; flex-shrink:0;
+  }
+  .summary-head-icon svg { width:18px; height:18px; }
+  .summary-head-title { flex:1; font-size:15px; font-weight:600; color:#1a1a1a; }
+
+  .history-body.summary-mode {
+    background-image:none; padding:16px 18px 0;
+    display:flex; flex-direction:column;
+  }
+  .sum-meta { font-size:12px; color:var(--muted); margin-bottom:10px; }
+  .sum-edit-card {
+    border:1px solid var(--border); border-radius:10px;
+    padding:14px; margin-bottom:18px;
+  }
+  .sum-edit-head { font-size:13px; font-weight:600; color:#1a1a1a; margin-bottom:10px; }
+  .sum-edit-row { display:flex; align-items:center; gap:10px; }
+  .sum-edit-av {
+    width:28px; height:28px; border-radius:50%;
+    background-size:cover; background-position:center;
+    color:#fff; font-size:11px; font-weight:600;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .sum-edit-av.actor-automation, .sum-edit-av.actor-llm {
+    background:linear-gradient(135deg, #ff8a3d 0%, #ff5b2e 60%, #e6356b 100%);
+  }
+  .sum-edit-av.actor-data { background:#e8e8e8; color:#5a5a5a; }
+  .sum-edit-av svg { width:14px; height:14px; }
+  .sum-edit-name { font-size:14px; font-weight:500; color:#1a1a1a; }
+  .sum-edit-sub { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  .sum-sections { flex:1; }
+  .sum-section-title { font-size:15px; font-weight:700; color:#1a1a1a; margin:18px 0 8px; }
+  .sum-section-title:first-child { margin-top:0; }
+  .sum-section-list { margin:0; padding-left:22px; color:#2a2a2a; font-size:14px; line-height:1.55; }
+  .sum-section-list li { margin-bottom:6px; }
+
+  .sum-questions { display:flex; flex-direction:column; gap:8px; margin:18px 0 12px; }
+  .sum-question {
+    display:flex; align-items:flex-start; gap:10px;
+    border:1px solid var(--border); border-radius:10px;
+    padding:12px 14px; cursor:pointer;
+    font-size:13px; color:#3a3a3a; line-height:1.4;
+    transition:background .12s;
+  }
+  .sum-question:hover { background:#f7f7f7; }
+  .sum-question svg { width:16px; height:16px; color:var(--muted); flex-shrink:0; margin-top:1px; }
+
+  .sum-footer {
+    position:sticky; bottom:0; background:#fff;
+    margin:auto -18px 0; padding:12px 18px;
+    border-top:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:12px; color:var(--muted);
+  }
+  .sum-footer-left { display:flex; align-items:center; gap:6px; }
+  .sum-footer-left svg { width:14px; height:14px; }
+  .sum-footer-actions { display:flex; gap:2px; }
+  .sum-footer-actions button {
+    background:transparent; border:none; cursor:pointer;
+    width:30px; height:30px; border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted);
+  }
+  .sum-footer-actions button:hover { background:#f2f2f2; color:#1a1a1a; }
+  .sum-footer-actions svg { width:16px; height:16px; }
+
   .ai-summary-popover {
     position:absolute; z-index:80;
     background:#fff; border:1px solid var(--border); border-radius:10px;
@@ -1014,7 +1091,7 @@ function renderHistoryBody() {
       aiBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="14" y2="6"/><line x1="4" y1="12" x2="11" y2="12"/><line x1="4" y1="18" x2="13" y2="18"/><path d="M18 14l1.2 2.4L21.6 17.6 19.2 18.8 18 21.2 16.8 18.8 14.4 17.6 16.8 16.4z" fill="currentColor" stroke="none"/></svg>`;
       aiBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        openAiSummaryPopover(aiBtn, it);
+        openAiSummaryPanel(it);
       });
       actions.appendChild(aiBtn);
 
@@ -1085,50 +1162,172 @@ function openItemPopover(anchor, item) {
   }));
 }
 
-const aiSummaries = {
-  user: [
-    'Re-parented 3 nodes under "AI Tools" page',
-    'Renamed terminal node to "Helix Mixer"',
-    'Added 2 wallets to "Suspect cluster A"',
-  ],
-  automation: [
-    'LIFO traced 12 outbound hops from Coinbase deposit',
-    'Auto-grouped 8 wallets by exchange heuristic',
-    'Tagged 4 counterparties as "mixer-adjacent"',
-    'Pulled 320 new transactions since last sync',
-  ],
-  llm: [
-    'Summarized fund flow: Coinbase → 3 intermediaries → Helix Mixer',
-    'Suggested 3 likely peel-chain candidates downstream',
-    'Flagged 1 high-risk counterparty (OFAC SDN match)',
-    'Drafted narrative paragraph for the case report',
-  ],
-  data: [
-    'Refreshed balances for 27 addresses across BTC/ETH',
-    'Attributed 2 clusters to Binance Hot Wallet 14',
-    'Pulled latest tx data from 3 chains',
-  ],
+const aiSummariesDetailed = {
+  user: {
+    sections: [
+      { title:'Graph structure', bullets:[
+        'Re-parented 3 nodes under the new "AI Tools" page',
+        'Renamed terminal node from "Mixer 1" to "Helix Mixer"',
+      ]},
+      { title:'Cluster updates', bullets:[
+        'Added 4 wallet addresses to "Suspect cluster A"',
+        'Tagged 2 counterparties as "exchange — Tier 1"',
+      ]},
+    ],
+    questions: [
+      'Which of these wallets share funding with the mixer?',
+      'Should "Suspect cluster A" be split into deposit vs withdrawal?',
+    ],
+  },
+  automation: {
+    sections: [
+      { title:'LIFO trace results', bullets:[
+        'Expanded 12 outbound hops from the Coinbase deposit address',
+        'Followed 0.84 BTC across 7 intermediate wallets before termination',
+        'Stopped trace at "Helix Mixer" (known mixer service)',
+      ]},
+      { title:'Heuristic grouping', bullets:[
+        'Auto-grouped 8 wallets by shared exchange deposit pattern',
+        'Tagged 4 counterparties as "mixer-adjacent" (≤2 hops to mixer)',
+      ]},
+      { title:'Data sync', bullets:[
+        'Pulled 320 new transactions across BTC and ETH chains',
+        'Refreshed balances for 27 monitored addresses',
+      ]},
+    ],
+    questions: [
+      'Should the LIFO trace continue past the mixer?',
+      'Re-run the heuristic with stricter exchange-pattern threshold?',
+    ],
+  },
+  llm: {
+    sections: [
+      { title:'Fund-flow narrative', bullets:[
+        'Summarized fund flow: Coinbase deposit → 3 intermediate hops → Helix Mixer',
+        'Drafted a 2-paragraph narrative suitable for the case report',
+      ]},
+      { title:'Risk findings', bullets:[
+        'Flagged 1 high-risk counterparty matching OFAC SDN list (0x4a…e21f)',
+        'Suggested 3 likely peel-chain candidates downstream of the mixer',
+        'Estimated obfuscation cost ≈ 0.012 BTC in mixer fees',
+      ]},
+      { title:'Next-step suggestions', bullets:[
+        'Open a sub-investigation for the OFAC match',
+        'Subscribe to alerts on the 3 peel-chain candidates',
+      ]},
+    ],
+    questions: [
+      'Generate a SAR-ready summary from these findings?',
+      'Which of the peel-chain candidates is highest priority?',
+    ],
+  },
+  data: {
+    sections: [
+      { title:'Attribution', bullets:[
+        'Attributed 2 clusters to Binance Hot Wallet 14',
+        'Confirmed exchange labels for 11 previously unknown addresses',
+      ]},
+      { title:'Data refresh', bullets:[
+        'Refreshed balances for 27 addresses across BTC and ETH',
+        'Pulled latest transaction data from 3 chains',
+      ]},
+    ],
+    questions: [
+      'Re-run attribution with the latest cluster heuristics?',
+      'Subscribe this graph to live balance updates?',
+    ],
+  },
 };
-function openAiSummaryPopover(anchor, item) {
+// Legacy shape used elsewhere (kept for backwards compatibility)
+const aiSummaries = Object.fromEntries(Object.entries(aiSummariesDetailed).map(([k,v]) => [k, v.sections.flatMap(s => s.bullets)]));
+function openAiSummaryPanel(item) {
   closeItemPopover();
-  const pop = document.createElement('div');
-  pop.className = 'ai-summary-popover';
-  const bullets = (aiSummaries[item.actor] || aiSummaries.user).map(b => `<li>${b}</li>`).join('');
-  pop.innerHTML = `
-    <div class="ai-summary-head">
-      <span class="ai-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 4.8L18.6 8.6 13.8 10.4 12 15.2 10.2 10.4 5.4 8.6 10.2 6.8z"/><path d="M19 14l.9 2.4L22.3 17.3 19.9 18.2 19 20.6 18.1 18.2 15.7 17.3 18.1 16.4z"/></svg></span>
-      AI summary of changes
+  if (!historyDrawer) return;
+  const detail = aiSummariesDetailed[item.actor] || aiSummariesDetailed.user;
+  const groupLabel = currentGroupLabelFor(item);
+  const asof = formatAsOf(groupLabel, item.time);
+
+  // Header swap
+  const header = historyDrawer.querySelector('.history-header');
+  header.innerHTML = `
+    <button class="history-back" id="summaryBack" title="Back to all changes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <span class="summary-head-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="14" y2="6"/><line x1="4" y1="12" x2="11" y2="12"/><line x1="4" y1="18" x2="13" y2="18"/><path d="M18 14l1.2 2.4L21.6 17.6 19.2 18.8 18 21.2 16.8 18.8 14.4 17.6 16.8 16.4z" fill="currentColor" stroke="none"/></svg>
+    </span>
+    <div class="summary-head-title">Summary of changes</div>
+    <button class="history-close" id="historyClose" title="Close">${filterIcons.close}</button>
+  `;
+  header.querySelector('#summaryBack').addEventListener('click', restoreHistoryHeader);
+  header.querySelector('#historyClose').addEventListener('click', closeHistory);
+
+  // Actor card
+  let actorChip = '';
+  if (item.actor === 'user') {
+    const u = item.actorId === 'you' ? currentUser : users.find(x => x.id === item.actorId);
+    const av = u && u.avatar
+      ? `<span class="sum-edit-av" style="background-image:url('${u.avatar}')"></span>`
+      : `<span class="sum-edit-av" style="background:${u ? u.color : '#888'}">${u ? u.initials : '?'}</span>`;
+    actorChip = `<div class="sum-edit-card"><div class="sum-edit-head">1 person edited this version</div><div class="sum-edit-row">${av}<span class="sum-edit-name">${escapeHtml(u ? u.name : 'Unknown')}</span></div></div>`;
+  } else {
+    const triggered = item.actorId ? (item.actorId === 'you' ? currentUser : users.find(x => x.id === item.actorId)) : null;
+    const actorLabel = item.actor === 'automation' ? 'Automation' : item.actor === 'llm' ? 'AI Agent' : 'Data update';
+    const actorIcon = `<span class="sum-edit-av actor-${item.actor}">${actorIcons[item.actor] || ''}</span>`;
+    const triggerLine = triggered ? `<div class="sum-edit-sub">Triggered by ${escapeHtml(triggered.name)}</div>` : '';
+    actorChip = `<div class="sum-edit-card"><div class="sum-edit-head">${actorLabel} ran on this version</div><div class="sum-edit-row">${actorIcon}<div><div class="sum-edit-name">${actorLabel}</div>${triggerLine}</div></div></div>`;
+  }
+
+  const sectionsHtml = detail.sections.map(s => `
+    <h4 class="sum-section-title">${escapeHtml(s.title)}</h4>
+    <ul class="sum-section-list">${s.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul>
+  `).join('');
+
+  const questionsHtml = detail.questions.map(q => `
+    <div class="sum-question">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>${escapeHtml(q)}</span>
     </div>
-    <div class="ai-summary-body">
-      <ul>${bullets}</ul>
+  `).join('');
+
+  const body = historyDrawer.querySelector('#historyBody');
+  body.classList.add('summary-mode');
+  body.innerHTML = `
+    <div class="sum-meta">${escapeHtml(asof)} · ${escapeHtml(item.desc)}</div>
+    ${actorChip}
+    <div class="sum-sections">${sectionsHtml}</div>
+    ${questionsHtml ? `<div class="sum-questions">${questionsHtml}</div>` : ''}
+    <div class="sum-footer">
+      <span class="sum-footer-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Uses AI. Verify results.
+      </span>
+      <span class="sum-footer-actions">
+        <button title="Helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg></button>
+        <button title="Not helpful"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg></button>
+        <button title="Comment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+      </span>
     </div>
   `;
-  historyDrawer.appendChild(pop);
-  const aRect = anchor.getBoundingClientRect();
-  const dRect = historyDrawer.getBoundingClientRect();
-  pop.style.left = Math.max(8, aRect.left - dRect.left - 250) + 'px';
-  pop.style.top = (aRect.bottom - dRect.top + 4) + 'px';
-  openPopover = pop;
+  body.scrollTop = 0;
+}
+
+function restoreHistoryHeader() {
+  if (!historyDrawer) return;
+  const header = historyDrawer.querySelector('.history-header');
+  header.innerHTML = `
+    <button class="history-filter-btn" id="historyFilterBtn" title="Filter">
+      ${filterIcons.all}
+      <span id="filterBtnLabel">${filterLabel()}</span>
+    </button>
+    <div class="history-title" style="text-align:right;font-size:13px;color:var(--muted);font-weight:500;">Version history</div>
+    <button class="history-close" id="historyClose" title="Close">${filterIcons.close}</button>
+  `;
+  header.querySelector('#historyClose').addEventListener('click', closeHistory);
+  header.querySelector('#historyFilterBtn').addEventListener('click', (e) => { e.stopPropagation(); openFilterMenu(); });
+  const body = historyDrawer.querySelector('#historyBody');
+  body.classList.remove('summary-mode');
+  renderHistoryBody();
 }
 
 function closeFilterMenu() { if (filterMenu) { filterMenu.remove(); filterMenu = null; } }
