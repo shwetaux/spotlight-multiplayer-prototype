@@ -150,28 +150,89 @@
   .filter-option.selected .opt-check { opacity:1; }
   .filter-option .opt-check svg { width:14px; height:14px; }
   .filter-menu-divider { height:1px; background:var(--border); margin:6px 0; }
-  .history-body { flex:1; overflow-y:auto; }
-  .history-group { padding:8px 0; }
-  .history-group-title { padding:10px 16px 6px; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
+  .history-body { flex:1; overflow-y:auto; padding-bottom:8px; }
+  .history-group { padding:4px 0; }
+  .history-group-header {
+    display:flex; align-items:center; gap:12px;
+    padding:10px 16px; cursor:pointer; user-select:none;
+  }
+  .history-group-header:hover .group-chevron { background:#eee; }
+  .group-chevron {
+    width:28px; height:28px; border-radius:50%;
+    background:#f2f2f2; display:flex; align-items:center; justify-content:center;
+    color:#555; transition:transform .2s, background .12s;
+  }
+  .group-chevron svg { width:14px; height:14px; }
+  .history-group.collapsed .group-chevron svg { transform:rotate(-90deg); transition:transform .2s; }
+  .history-group:not(.collapsed) .group-chevron svg { transform:rotate(0); transition:transform .2s; }
+  .group-title { flex:1; font-size:15px; font-weight:600; color:#1a1a1a; }
+  .group-meta { font-size:13px; color:var(--muted); }
+  .group-current-badge { font-size:12px; background:#f2f2f2; color:#5a5a5a; padding:4px 10px; border-radius:14px; font-weight:500; }
+  .history-items { padding:0 0 8px; }
+  .history-group.collapsed .history-items { display:none; }
+
   .history-item {
-    padding:10px 16px; display:flex; gap:10px; cursor:pointer;
-    border-left:3px solid transparent;
-    transition:background .1s, border-color .1s;
+    position:relative;
+    display:flex; gap:12px; align-items:flex-start;
+    padding:8px 16px 8px 18px;
+    cursor:default;
+    transition:background .12s;
   }
   .history-item:hover { background:#f7f7f7; }
-  .history-item.current { background:#fff5f0; border-left-color:var(--accent); }
-  .history-item .item-time { font-size:13px; font-weight:500; color:#1a1a1a; }
-  .history-item .item-current-badge { display:inline-block; margin-left:6px; font-size:10px; background:var(--accent); color:#fff; padding:1px 6px; border-radius:8px; font-weight:600; }
-  .history-item .item-desc { font-size:12px; color:var(--muted); margin-top:2px; }
-  .history-item .item-editors { display:flex; align-items:center; gap:6px; margin-top:6px; }
-  .history-item .item-editors .avatar { width:20px; height:20px; border:1.5px solid #fff; margin-left:-4px; font-size:9px; }
-  .history-item .item-editors .avatar:first-child { margin-left:0; }
-  .history-item .item-editor-name { font-size:11px; color:#5a5a5a; }
-  .history-item .item-content { flex:1; }
-  .history-item .item-actions { opacity:0; transition:opacity .15s; }
-  .history-item:hover .item-actions { opacity:1; }
-  .history-restore { background:transparent; border:1px solid var(--border); color:#1a1a1a; font-size:11px; padding:4px 10px; border-radius:6px; cursor:pointer; }
-  .history-restore:hover { background:#f2f2f2; }
+  .item-avatar-wrap { position:relative; flex-shrink:0; }
+  .item-avatar {
+    width:36px; height:36px; border-radius:50%;
+    background-size:cover; background-position:center;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+  }
+  .item-avatar.actor-automation,
+  .item-avatar.actor-llm {
+    background:linear-gradient(135deg, #ff8a3d 0%, #ff5b2e 60%, #e6356b 100%);
+  }
+  .item-avatar.actor-data { background:#e8e8e8; color:#5a5a5a; }
+  .item-avatar svg { width:18px; height:18px; }
+  .item-avatar-attrib {
+    position:absolute; right:-3px; bottom:-3px;
+    width:18px; height:18px; border-radius:50%;
+    border:2px solid #fff;
+    background-size:cover; background-position:center;
+  }
+  .item-content { flex:1; min-width:0; padding-top:1px; }
+  .item-time { font-size:14px; font-weight:600; color:#1a1a1a; line-height:1.25; }
+  .item-desc { font-size:13px; color:#7a7a7a; margin-top:2px; line-height:1.3; }
+  .item-extra { display:flex; align-items:center; gap:14px; margin-top:6px; }
+  .item-chat-link { display:inline-flex; align-items:center; gap:5px; color:#5a4cf4; font-size:12px; font-weight:500; cursor:pointer; }
+  .item-chat-link svg { width:14px; height:14px; }
+  .item-menu-btn {
+    background:transparent; border:none; cursor:pointer;
+    width:28px; height:28px; border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); opacity:0; transition:opacity .12s, background .12s;
+    flex-shrink:0;
+  }
+  .history-item:hover .item-menu-btn { opacity:1; }
+  .item-menu-btn:hover { background:#eaeaea; color:#1a1a1a; }
+  .item-menu-btn svg { width:16px; height:16px; }
+
+  .item-popover {
+    position:absolute; z-index:80;
+    background:#fff; border:1px solid var(--border); border-radius:8px;
+    box-shadow:0 6px 20px rgba(0,0,0,.12);
+    padding:4px; min-width:180px;
+    animation:panelIn .12s ease-out;
+  }
+  .item-popover .popover-action {
+    display:flex; align-items:center; gap:10px;
+    padding:8px 10px; border-radius:6px; cursor:pointer;
+    font-size:13px; color:#1a1a1a;
+  }
+  .item-popover .popover-action:hover { background:#f5f5f5; }
+  .item-popover .popover-action svg { width:15px; height:15px; color:#5a5a5a; }
+
+  .history-show-older { padding:14px 16px; font-size:13px; color:#5a4cf4; font-weight:500; cursor:pointer; }
+  .history-show-older:hover { text-decoration:underline; }
+
   .history-footer { padding:10px 16px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); }
   @keyframes panelIn { from { opacity:0; transform:scale(0.95) translateY(-4px); } to { opacity:1; transform:scale(1) translateY(0); } }
   .panel-header { padding:12px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
@@ -651,32 +712,49 @@ function clearAllSelections() {
 }
 
 // ============== VERSION HISTORY ==============
+// actor types: 'user' (specific user via actorId), 'automation', 'llm', 'data'
 const versionHistory = [
-  { group:'Today', items: [
-    { time:'2 minutes ago',  desc:'Auto-saved',                       editors:['you','tom'], current:true, source:'user', autoSaved:true },
-    { time:'15 minutes ago', desc:'Renamed cluster to Helix Mixer',   editors:['tom'],   source:'user' },
-    { time:'32 minutes ago', desc:'LLM tagged 4 nodes as exchange',   editors:['you'],   source:'llm' },
-    { time:'47 minutes ago', desc:'Added 3 outbound transfers',       editors:['adam'],  source:'user' },
-    { time:'1 hour ago',     desc:'Auto-saved',                       editors:['you'],   source:'user', autoSaved:true },
-    { time:'2 hours ago',    desc:'Automation: reconciled balances',  editors:[],        source:'automation' },
-    { time:'3 hours ago',    desc:'Connected Coinbase.com source',    editors:['you','sara'], source:'user' },
+  { group:'Today', current:true, items: [
+    { time:'2:30 PM',  desc:'Ashley P.',                       actor:'user',       actorId:'you',  current:true, autoSaved:true },
+    { time:'1:30 PM',  desc:'LIFO workflow by Ashley P.',      actor:'automation', actorId:'you' },
+    { time:'11:30 AM', desc:'LLM(?) by Ashley P.',             actor:'llm',        actorId:'you',  chat:true },
+    { time:'10:48 AM', desc:'2 clusters attributed(?)',        actor:'data' },
+    { time:'9:12 AM',  desc:'Tom Martin',                      actor:'user',       actorId:'tom' },
+    { time:'8:04 AM',  desc:'Auto-saved by Ashley P.',         actor:'user',       actorId:'you',  autoSaved:true },
   ]},
   { group:'Yesterday', items: [
-    { time:'4:32 PM', desc:'Added Helix Mixer destination node',      editors:['sara'],  source:'user' },
-    { time:'3:10 PM', desc:'LLM summarized risk score',               editors:['you'],   source:'llm' },
-    { time:'2:14 PM', desc:'Auto-saved',                              editors:['mike'],  source:'user', autoSaved:true },
-    { time:'1:48 PM', desc:'Automation: imported chain data',         editors:[],        source:'automation' },
-    { time:'11:08 AM', desc:'Initial graph layout',                   editors:['you'],   source:'user' },
+    { time:'6:14 PM',  desc:'Adam H',                           actor:'user',       actorId:'adam' },
+    { time:'4:32 PM',  desc:'Sara Chen',                        actor:'user',       actorId:'sara' },
+    { time:'3:10 PM',  desc:'LLM(?) by Ashley P.',              actor:'llm',        actorId:'you',  chat:true },
+    { time:'1:48 PM',  desc:'Sync workflow by Mike Lopez',      actor:'automation', actorId:'mike' },
+    { time:'11:08 AM', desc:'Ashley P.',                        actor:'user',       actorId:'you',  autoSaved:true },
   ]},
-  { group:'May 18', items: [
-    { time:'6:42 PM', desc:'Restored from May 17 version',            editors:['adam'],  source:'user' },
-    { time:'3:20 PM', desc:'Auto-saved',                              editors:['kira'],  source:'user', autoSaved:true },
-    { time:'10:05 AM', desc:'Created graph',                          editors:['you'],   source:'user' },
+  { group:'March 8th, 7:50 AM', items: [
+    { time:'7:50 AM', desc:'Kira Patel',                        actor:'user',       actorId:'kira' },
+    { time:'6:42 AM', desc:'LIFO workflow by Adam H',           actor:'automation', actorId:'adam' },
+    { time:'5:20 AM', desc:'LLM(?) by Ashley P.',               actor:'llm',        actorId:'you' },
+    { time:'4:11 AM', desc:'4 clusters attributed(?)',          actor:'data' },
+    { time:'3:05 AM', desc:'Ashley P.',                         actor:'user',       actorId:'you',  autoSaved:true },
+  ]},
+  { group:'March 7th, 2:14 PM', items: [
+    { time:'2:14 PM', desc:'Tom Martin',                        actor:'user',       actorId:'tom' },
+    { time:'1:30 PM', desc:'LIFO workflow by Sara Chen',        actor:'automation', actorId:'sara' },
+    { time:'12:08 PM', desc:'LLM(?) by Ashley P.',              actor:'llm',        actorId:'you' },
+    { time:'11:45 AM', desc:'Adam H',                           actor:'user',       actorId:'adam' },
+    { time:'10:30 AM', desc:'Ashley P.',                        actor:'user',       actorId:'you',  autoSaved:true },
+  ]},
+  { group:'March 6th, 9:30 AM', items: [
+    { time:'9:30 AM', desc:'Kira Patel',                        actor:'user',       actorId:'kira' },
+    { time:'8:15 AM', desc:'Sync workflow',                     actor:'automation' },
+    { time:'7:02 AM', desc:'LLM(?)',                            actor:'llm' },
+    { time:'6:18 AM', desc:'2 clusters attributed(?)',          actor:'data' },
+    { time:'5:00 AM', desc:'Ashley P.',                         actor:'user',       actorId:'you',  autoSaved:true },
   ]},
 ];
 
 let historyFilter = 'all'; // 'all' | 'yours' | 'automation' | 'llm'
 let showAutoSaved = true;
+let collapsedGroups = new Set(); // group names that are collapsed (default: all except Today)
 
 let historyDrawer = null;
 let filterMenu = null;
@@ -696,15 +774,26 @@ function filterLabel() {
 function getFilteredHistory() {
   return versionHistory.map(grp => ({
     group: grp.group,
+    current: grp.current,
     items: grp.items.filter(it => {
       if (!showAutoSaved && it.autoSaved) return false;
       if (historyFilter === 'all') return true;
-      if (historyFilter === 'yours') return it.editors.includes('you');
-      if (historyFilter === 'automation') return it.source === 'automation';
-      if (historyFilter === 'llm') return it.source === 'llm';
+      if (historyFilter === 'yours') return it.actorId === 'you';
+      if (historyFilter === 'automation') return it.actor === 'automation';
+      if (historyFilter === 'llm') return it.actor === 'llm';
       return true;
     })
   })).filter(g => g.items.length > 0);
+}
+
+const actorIcons = {
+  automation: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h6a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H11a4 4 0 0 0-4 4v0"/></svg>`,
+  llm: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 4.4L18 8l-4.4 1.6L12 14l-1.6-4.4L6 8l4.4-1.6L12 2zm6 11l1 2.5 2.5 1-2.5 1L18 20l-1-2.5L14.5 16.5l2.5-1L18 13z"/></svg>`,
+  data: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/><path d="M12 13v8M9 17l3-3 3 3"/></svg>`,
+};
+
+function chatLinkSvg() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3a3 3 0 0 0-3 3v0a2.5 2.5 0 0 0-2 4v0a2.5 2.5 0 0 0 1 4.5v0a2.5 2.5 0 0 0 1 4.5v0A3 3 0 0 0 9 21h.5V3H9zM15 3a3 3 0 0 1 3 3v0a2.5 2.5 0 0 1 2 4v0a2.5 2.5 0 0 1-1 4.5v0a2.5 2.5 0 0 1-1 4.5v0A3 3 0 0 1 15 21h-.5V3H15z"/></svg>`;
 }
 
 function renderHistoryBody() {
@@ -716,42 +805,139 @@ function renderHistoryBody() {
     return;
   }
   data.forEach(grp => {
+    const isCollapsed = collapsedGroups.has(grp.group);
     const g = document.createElement('div');
-    g.className = 'history-group';
-    g.innerHTML = `<div class="history-group-title">${grp.group}</div>`;
-    grp.items.forEach(it => {
-      const editorObjs = it.editors.map(id => id === 'you' ? currentUser : users.find(u => u.id === id)).filter(Boolean);
-      const editorNames = editorObjs.length ? editorObjs.map(u => u.id === 'you' ? 'You' : u.name).join(', ') : (it.source === 'automation' ? 'Automation' : it.source === 'llm' ? 'LLM' : '');
-      const item = document.createElement('div');
-      item.className = 'history-item' + (it.current ? ' current' : '');
-      item.innerHTML = `
-        <div class="item-content">
-          <div class="item-time">${it.time}${it.current ? '<span class="item-current-badge">Current</span>' : ''}</div>
-          <div class="item-desc">${it.desc}</div>
-          <div class="item-editors">
-            <div style="display:flex">${editorObjs.map(u => `<div class="avatar" data-uid="${u.id}"></div>`).join('')}</div>
-            <span class="item-editor-name">${editorNames}</span>
-          </div>
-        </div>
-        ${!it.current ? '<div class="item-actions"><button class="history-restore">Restore</button></div>' : ''}
-      `;
-      item.querySelectorAll('.avatar[data-uid]').forEach(el => {
-        const u = el.dataset.uid === 'you' ? currentUser : users.find(x => x.id === el.dataset.uid);
-        if (u) styleAvatar(el, u);
-      });
-      const restoreBtn = item.querySelector('.history-restore');
-      if (restoreBtn) restoreBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        restoreBtn.textContent = 'Restored ✓';
-        restoreBtn.style.background = '#fff5f0';
-        restoreBtn.style.borderColor = 'var(--accent)';
-        restoreBtn.style.color = 'var(--accent)';
-        setTimeout(() => closeHistory(), 700);
-      });
-      g.appendChild(item);
+    g.className = 'history-group' + (isCollapsed ? ' collapsed' : '');
+    const rightMeta = grp.current ? `<div class="group-current-badge">Current version</div>` : `<div class="group-meta">${grp.items.length} versions</div>`;
+    g.innerHTML = `
+      <div class="history-group-header">
+        <div class="group-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="group-title">${grp.group.startsWith('March') || grp.group === 'Yesterday' || grp.group === 'Today' ? grp.group : grp.group}</div>
+        ${rightMeta}
+      </div>
+      <div class="history-items"></div>
+    `;
+    g.querySelector('.history-group-header').addEventListener('click', () => {
+      if (collapsedGroups.has(grp.group)) collapsedGroups.delete(grp.group);
+      else collapsedGroups.add(grp.group);
+      renderHistoryBody();
     });
+
+    const itemsContainer = g.querySelector('.history-items');
+    grp.items.forEach(it => {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+
+      // Avatar
+      const avatarWrap = document.createElement('div');
+      avatarWrap.className = 'item-avatar-wrap';
+      const av = document.createElement('div');
+      av.className = 'item-avatar';
+      if (it.actor === 'user') {
+        const u = it.actorId === 'you' ? currentUser : users.find(x => x.id === it.actorId);
+        if (u) styleAvatar(av, u);
+      } else if (it.actor === 'automation') {
+        av.classList.add('actor-automation');
+        av.innerHTML = actorIcons.automation;
+      } else if (it.actor === 'llm') {
+        av.classList.add('actor-llm');
+        av.innerHTML = actorIcons.llm;
+      } else if (it.actor === 'data') {
+        av.classList.add('actor-data');
+        av.innerHTML = actorIcons.data;
+      }
+      avatarWrap.appendChild(av);
+
+      // Attribution sub-avatar (for automation/llm triggered by user)
+      if ((it.actor === 'automation' || it.actor === 'llm') && it.actorId) {
+        const u = it.actorId === 'you' ? currentUser : users.find(x => x.id === it.actorId);
+        if (u) {
+          const sub = document.createElement('div');
+          sub.className = 'item-avatar-attrib';
+          if (u.avatar) sub.style.backgroundImage = `url("${u.avatar}")`;
+          else sub.style.backgroundColor = u.color;
+          avatarWrap.appendChild(sub);
+        }
+      }
+      item.appendChild(avatarWrap);
+
+      // Content
+      const content = document.createElement('div');
+      content.className = 'item-content';
+      content.innerHTML = `
+        <div class="item-time">${it.time}</div>
+        <div class="item-desc">${it.desc}</div>
+        ${it.chat ? `<div class="item-extra"><span class="item-chat-link">${chatLinkSvg()} View in chat</span></div>` : ''}
+      `;
+      item.appendChild(content);
+
+      // Menu button (skip on current)
+      if (!it.current) {
+        const menuBtn = document.createElement('button');
+        menuBtn.className = 'item-menu-btn';
+        menuBtn.title = 'More';
+        menuBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>`;
+        menuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openItemPopover(menuBtn, it);
+        });
+        item.appendChild(menuBtn);
+      }
+
+      itemsContainer.appendChild(item);
+    });
+
     body.appendChild(g);
   });
+
+  // Show older link
+  const showOlder = document.createElement('div');
+  showOlder.className = 'history-show-older';
+  showOlder.textContent = 'Show older';
+  showOlder.addEventListener('click', () => {
+    showOlder.textContent = 'No older versions';
+    showOlder.style.color = 'var(--muted)';
+    showOlder.style.cursor = 'default';
+  });
+  body.appendChild(showOlder);
+}
+
+let openPopover = null;
+function closeItemPopover() {
+  if (openPopover) { openPopover.remove(); openPopover = null; }
+}
+function openItemPopover(anchor, item) {
+  closeItemPopover();
+  const pop = document.createElement('div');
+  pop.className = 'item-popover';
+  pop.innerHTML = `
+    <div class="popover-action" data-act="duplicate">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Duplicate
+    </div>
+    <div class="popover-action" data-act="restore">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      Restore this version
+    </div>
+  `;
+  historyDrawer.appendChild(pop);
+  // position near anchor
+  const aRect = anchor.getBoundingClientRect();
+  const dRect = historyDrawer.getBoundingClientRect();
+  pop.style.left = (aRect.left - dRect.left - 170) + 'px';
+  pop.style.top = (aRect.bottom - dRect.top + 4) + 'px';
+  openPopover = pop;
+  pop.querySelectorAll('.popover-action').forEach(a => a.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const act = a.dataset.act;
+    if (act === 'restore') {
+      a.textContent = 'Restored ✓';
+      a.style.color = 'var(--accent)';
+      setTimeout(() => { closeItemPopover(); closeHistory(); }, 600);
+    } else {
+      closeItemPopover();
+    }
+  }));
 }
 
 function closeFilterMenu() { if (filterMenu) { filterMenu.remove(); filterMenu = null; } }
