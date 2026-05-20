@@ -129,11 +129,27 @@
     display:flex; flex-direction:column;
   }
   .history-drawer.open { transform:translateX(0); }
-  .history-header { padding:14px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
-  .history-title { font-size:15px; font-weight:600; }
+  .history-header { padding:14px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); position:relative; }
+  .history-title { font-size:15px; font-weight:600; flex:1; }
+  .history-filter-btn { display:flex; align-items:center; gap:6px; background:#f4f4f4; border:none; border-radius:14px; padding:5px 12px 5px 8px; font-size:13px; color:#1a1a1a; cursor:pointer; transition:background .12s; }
+  .history-filter-btn:hover { background:#eaeaea; }
+  .history-filter-btn svg { width:14px; height:14px; }
   .history-close { background:transparent; border:none; cursor:pointer; color:var(--muted); padding:4px; border-radius:4px; display:flex; }
   .history-close:hover { background:#f2f2f2; color:#1a1a1a; }
   .history-close svg { width:18px; height:18px; }
+
+  .filter-menu { position:absolute; top:48px; left:16px; min-width:220px; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:70; padding:6px 0; animation:panelIn .15s ease-out; transform-origin:top left; }
+  .filter-menu-title { padding:8px 14px 4px; font-size:11px; color:var(--muted); font-weight:500; text-transform:none; }
+  .filter-option { display:flex; align-items:center; gap:10px; padding:8px 14px; cursor:pointer; font-size:13px; color:#1a1a1a; }
+  .filter-option:hover { background:#f5f5f5; }
+  .filter-option .opt-icon { width:18px; height:18px; display:flex; align-items:center; justify-content:center; color:#1a1a1a; }
+  .filter-option .opt-icon svg { width:16px; height:16px; }
+  .filter-option .opt-icon .avatar { width:18px; height:18px; border:none; margin:0; }
+  .filter-option .opt-label { flex:1; }
+  .filter-option .opt-check { color:#1a1a1a; opacity:0; }
+  .filter-option.selected .opt-check { opacity:1; }
+  .filter-option .opt-check svg { width:14px; height:14px; }
+  .filter-menu-divider { height:1px; background:var(--border); margin:6px 0; }
   .history-body { flex:1; overflow-y:auto; }
   .history-group { padding:8px 0; }
   .history-group-title { padding:10px 16px 6px; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
@@ -637,48 +653,75 @@ function clearAllSelections() {
 // ============== VERSION HISTORY ==============
 const versionHistory = [
   { group:'Today', items: [
-    { time:'2 minutes ago',  desc:'Auto-saved',                  editors:['you','tom'],   current:true },
-    { time:'15 minutes ago', desc:'Renamed cluster to Helix Mixer', editors:['tom'] },
-    { time:'47 minutes ago', desc:'Added 3 outbound transfers',  editors:['adam'] },
-    { time:'1 hour ago',     desc:'Auto-saved',                  editors:['you'] },
-    { time:'3 hours ago',    desc:'Connected Coinbase.com source', editors:['you','sara'] },
+    { time:'2 minutes ago',  desc:'Auto-saved',                       editors:['you','tom'], current:true, source:'user', autoSaved:true },
+    { time:'15 minutes ago', desc:'Renamed cluster to Helix Mixer',   editors:['tom'],   source:'user' },
+    { time:'32 minutes ago', desc:'LLM tagged 4 nodes as exchange',   editors:['you'],   source:'llm' },
+    { time:'47 minutes ago', desc:'Added 3 outbound transfers',       editors:['adam'],  source:'user' },
+    { time:'1 hour ago',     desc:'Auto-saved',                       editors:['you'],   source:'user', autoSaved:true },
+    { time:'2 hours ago',    desc:'Automation: reconciled balances',  editors:[],        source:'automation' },
+    { time:'3 hours ago',    desc:'Connected Coinbase.com source',    editors:['you','sara'], source:'user' },
   ]},
   { group:'Yesterday', items: [
-    { time:'4:32 PM', desc:'Added Helix Mixer destination node', editors:['sara'] },
-    { time:'2:14 PM', desc:'Auto-saved',                         editors:['mike'] },
-    { time:'11:08 AM', desc:'Initial graph layout',              editors:['you'] },
+    { time:'4:32 PM', desc:'Added Helix Mixer destination node',      editors:['sara'],  source:'user' },
+    { time:'3:10 PM', desc:'LLM summarized risk score',               editors:['you'],   source:'llm' },
+    { time:'2:14 PM', desc:'Auto-saved',                              editors:['mike'],  source:'user', autoSaved:true },
+    { time:'1:48 PM', desc:'Automation: imported chain data',         editors:[],        source:'automation' },
+    { time:'11:08 AM', desc:'Initial graph layout',                   editors:['you'],   source:'user' },
   ]},
   { group:'May 18', items: [
-    { time:'6:42 PM', desc:'Restored from May 17 version',       editors:['adam'] },
-    { time:'3:20 PM', desc:'Auto-saved',                         editors:['kira'] },
-    { time:'10:05 AM', desc:'Created graph',                     editors:['you'] },
+    { time:'6:42 PM', desc:'Restored from May 17 version',            editors:['adam'],  source:'user' },
+    { time:'3:20 PM', desc:'Auto-saved',                              editors:['kira'],  source:'user', autoSaved:true },
+    { time:'10:05 AM', desc:'Created graph',                          editors:['you'],   source:'user' },
   ]},
 ];
 
-let historyDrawer = null;
-function openHistory() {
-  if (historyDrawer) return;
-  historyDrawer = document.createElement('div');
-  historyDrawer.className = 'history-drawer';
-  historyDrawer.innerHTML = `
-    <div class="history-header">
-      <div class="history-title">Version history</div>
-      <button class="history-close" id="historyClose" title="Close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="history-body" id="historyBody"></div>
-    <div class="history-footer">Only the last 30 days are shown</div>
-  `;
-  main.appendChild(historyDrawer);
+let historyFilter = 'all'; // 'all' | 'yours' | 'automation' | 'llm'
+let showAutoSaved = true;
 
+let historyDrawer = null;
+let filterMenu = null;
+
+const filterIcons = {
+  all: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 14a3 3 0 0 0 5.2 2"/><polyline points="9 14 9 17 12 17"/></svg>`,
+  automation: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h6a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H11a4 4 0 0 0-4 4v0"/></svg>`,
+  llm: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3a3 3 0 0 0-3 3v0a2.5 2.5 0 0 0-2 4v0a2.5 2.5 0 0 0 1 4.5v0a2.5 2.5 0 0 0 1 4.5v0A3 3 0 0 0 9 21h.5V3H9zM15 3a3 3 0 0 1 3 3v0a2.5 2.5 0 0 1 2 4v0a2.5 2.5 0 0 1-1 4.5v0a2.5 2.5 0 0 1-1 4.5v0A3 3 0 0 1 15 21h-.5V3H15z"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+};
+
+function filterLabel() {
+  return { all:'All', yours:'Only yours', automation:'Only Automations', llm:'Only LLM' }[historyFilter] || 'All';
+}
+
+function getFilteredHistory() {
+  return versionHistory.map(grp => ({
+    group: grp.group,
+    items: grp.items.filter(it => {
+      if (!showAutoSaved && it.autoSaved) return false;
+      if (historyFilter === 'all') return true;
+      if (historyFilter === 'yours') return it.editors.includes('you');
+      if (historyFilter === 'automation') return it.source === 'automation';
+      if (historyFilter === 'llm') return it.source === 'llm';
+      return true;
+    })
+  })).filter(g => g.items.length > 0);
+}
+
+function renderHistoryBody() {
   const body = historyDrawer.querySelector('#historyBody');
-  versionHistory.forEach(grp => {
+  body.innerHTML = '';
+  const data = getFilteredHistory();
+  if (data.length === 0) {
+    body.innerHTML = '<div style="padding:32px 16px;text-align:center;color:#8a8a8a;font-size:13px;">No versions match this filter</div>';
+    return;
+  }
+  data.forEach(grp => {
     const g = document.createElement('div');
     g.className = 'history-group';
     g.innerHTML = `<div class="history-group-title">${grp.group}</div>`;
     grp.items.forEach(it => {
       const editorObjs = it.editors.map(id => id === 'you' ? currentUser : users.find(u => u.id === id)).filter(Boolean);
+      const editorNames = editorObjs.length ? editorObjs.map(u => u.id === 'you' ? 'You' : u.name).join(', ') : (it.source === 'automation' ? 'Automation' : it.source === 'llm' ? 'LLM' : '');
       const item = document.createElement('div');
       item.className = 'history-item' + (it.current ? ' current' : '');
       item.innerHTML = `
@@ -687,7 +730,7 @@ function openHistory() {
           <div class="item-desc">${it.desc}</div>
           <div class="item-editors">
             <div style="display:flex">${editorObjs.map(u => `<div class="avatar" data-uid="${u.id}"></div>`).join('')}</div>
-            <span class="item-editor-name">${editorObjs.map(u => u.id === 'you' ? 'You' : u.name).join(', ')}</span>
+            <span class="item-editor-name">${editorNames}</span>
           </div>
         </div>
         ${!it.current ? '<div class="item-actions"><button class="history-restore">Restore</button></div>' : ''}
@@ -709,12 +752,90 @@ function openHistory() {
     });
     body.appendChild(g);
   });
+}
 
+function closeFilterMenu() { if (filterMenu) { filterMenu.remove(); filterMenu = null; } }
+function openFilterMenu() {
+  if (filterMenu) { closeFilterMenu(); return; }
+  filterMenu = document.createElement('div');
+  filterMenu.className = 'filter-menu';
+  filterMenu.innerHTML = `
+    <div class="filter-menu-title">Filter by</div>
+    <div class="filter-option ${historyFilter==='all'?'selected':''}" data-f="all">
+      <div class="opt-icon">${filterIcons.all}</div>
+      <div class="opt-label">All</div>
+      <div class="opt-check">${filterIcons.check}</div>
+    </div>
+    <div class="filter-option ${historyFilter==='yours'?'selected':''}" data-f="yours">
+      <div class="opt-icon"><div class="avatar" data-uid="you"></div></div>
+      <div class="opt-label">Only yours</div>
+      <div class="opt-check">${filterIcons.check}</div>
+    </div>
+    <div class="filter-option ${historyFilter==='automation'?'selected':''}" data-f="automation">
+      <div class="opt-icon">${filterIcons.automation}</div>
+      <div class="opt-label">Only Automations</div>
+      <div class="opt-check">${filterIcons.check}</div>
+    </div>
+    <div class="filter-option ${historyFilter==='llm'?'selected':''}" data-f="llm">
+      <div class="opt-icon">${filterIcons.llm}</div>
+      <div class="opt-label">Only LLM</div>
+      <div class="opt-check">${filterIcons.check}</div>
+    </div>
+    <div class="filter-menu-divider"></div>
+    <div class="filter-option ${showAutoSaved?'selected':''}" data-toggle="autosaved">
+      <div class="opt-label">Show auto saved versions</div>
+      <div class="opt-check">${filterIcons.check}</div>
+    </div>
+  `;
+  historyDrawer.querySelector('.history-header').appendChild(filterMenu);
+  filterMenu.querySelectorAll('.avatar[data-uid]').forEach(el => {
+    const u = el.dataset.uid === 'you' ? currentUser : users.find(x => x.id === el.dataset.uid);
+    if (u) styleAvatar(el, u);
+  });
+  filterMenu.querySelectorAll('.filter-option[data-f]').forEach(opt => {
+    opt.addEventListener('click', (e) => {
+      e.stopPropagation();
+      historyFilter = opt.dataset.f;
+      historyDrawer.querySelector('#filterBtnLabel').textContent = filterLabel();
+      renderHistoryBody();
+      closeFilterMenu();
+    });
+  });
+  filterMenu.querySelector('[data-toggle="autosaved"]').addEventListener('click', (e) => {
+    e.stopPropagation();
+    showAutoSaved = !showAutoSaved;
+    renderHistoryBody();
+    // refresh menu in-place to update check
+    const wasOpen = !!filterMenu;
+    closeFilterMenu();
+    if (wasOpen) openFilterMenu();
+  });
+}
+
+function openHistory() {
+  if (historyDrawer) return;
+  historyDrawer = document.createElement('div');
+  historyDrawer.className = 'history-drawer';
+  historyDrawer.innerHTML = `
+    <div class="history-header">
+      <button class="history-filter-btn" id="historyFilterBtn" title="Filter">
+        ${filterIcons.all}
+        <span id="filterBtnLabel">${filterLabel()}</span>
+      </button>
+      <div class="history-title" style="text-align:right;font-size:13px;color:var(--muted);font-weight:500;">Version history</div>
+      <button class="history-close" id="historyClose" title="Close">${filterIcons.close}</button>
+    </div>
+    <div class="history-body" id="historyBody"></div>
+    <div class="history-footer">Only the last 30 days are shown</div>
+  `;
+  main.appendChild(historyDrawer);
+  renderHistoryBody();
   historyDrawer.querySelector('#historyClose').addEventListener('click', closeHistory);
-  // animate in
+  historyDrawer.querySelector('#historyFilterBtn').addEventListener('click', (e) => { e.stopPropagation(); openFilterMenu(); });
   requestAnimationFrame(() => historyDrawer.classList.add('open'));
 }
 function closeHistory() {
+  closeFilterMenu();
   if (!historyDrawer) return;
   historyDrawer.classList.remove('open');
   const d = historyDrawer;
@@ -726,6 +847,9 @@ document.getElementById('savedLabel').addEventListener('click', (e) => {
   historyDrawer ? closeHistory() : openHistory();
 });
 document.addEventListener('mousedown', (e) => {
+  if (filterMenu && !filterMenu.contains(e.target) && !historyDrawer.querySelector('#historyFilterBtn').contains(e.target)) {
+    closeFilterMenu();
+  }
   if (!historyDrawer) return;
   if (historyDrawer.contains(e.target)) return;
   if (document.getElementById('savedLabel').contains(e.target)) return;
