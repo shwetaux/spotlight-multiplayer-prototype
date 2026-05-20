@@ -115,7 +115,7 @@
   .cursor svg { display:block; }
   .cursor-label { margin-top:4px; margin-left:12px; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:500; color:#fff; white-space:nowrap; display:inline-block; }
 
-  .spotlight-panel { position:absolute; top:6px; right:20px; width:300px; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:50; overflow:hidden; transform-origin:top right; animation:panelIn .18s ease-out; }
+  .spotlight-panel { position:absolute; width:300px; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.12); z-index:50; overflow:hidden; transform-origin:top left; animation:panelIn .18s ease-out; }
   @keyframes panelIn { from { opacity:0; transform:scale(0.95) translateY(-4px); } to { opacity:1; transform:scale(1) translateY(0); } }
   .panel-header { padding:12px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
   .panel-title { font-size:13px; font-weight:600; }
@@ -470,6 +470,11 @@ function openPanel() {
     </div>
   `;
   main.appendChild(panel);
+  // position right below the avatar group, aligned to its left edge
+  const agRect = avatarGroup.getBoundingClientRect();
+  const mainRect = main.getBoundingClientRect();
+  panel.style.left = Math.max(8, agRect.left - mainRect.left) + 'px';
+  panel.style.top = (agRect.bottom - mainRect.top + 6) + 'px';
   // hydrate panel-you avatar
   panel.querySelectorAll('.avatar[data-uid]').forEach(el => {
     const uid = el.dataset.uid;
