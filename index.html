@@ -739,7 +739,7 @@
     </div>
     <div class="tooltip" id="tooltip"></div>
     <div class="scene-controller" id="sceneCtl">
-      <span class="scene-counter" id="sceneCounter">1 / 13</span>
+      <span class="scene-counter" id="sceneCounter">1 / 14</span>
       <span class="scene-text" id="sceneText">You're alone on this graph. Click Next to see what happens when teammates join.</span>
       <button class="secondary" id="prevBtn">Back</button>
       <button id="nextBtn">Next →</button>
@@ -2147,6 +2147,16 @@ const scenes = [
       if (chatDrawer) closeChatDrawer();
       if (!historyDrawer) openHistory();
     }
+  },
+  {
+    text: "Use the filter pill (top-right of the drawer) to narrow the list — show only your edits, only Automations, only LLM actions, or toggle auto-saved versions on/off.",
+    enter() {
+      if (chatDrawer) closeChatDrawer();
+      if (!historyDrawer) openHistory();
+      closeFilterMenu();
+      setTimeout(() => openFilterMenu(), 250);
+    },
+    exit() { closeFilterMenu(); }
   },
   {
     text: "Click any historical entry to enter read-only mode and view that version. Use 'Restore' to bring it back.",
