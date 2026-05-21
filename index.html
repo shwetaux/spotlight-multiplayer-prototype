@@ -1359,6 +1359,14 @@ function openItemPopover(anchor, item) {
   const pop = document.createElement('div');
   pop.className = 'item-popover';
   pop.innerHTML = `
+    <div class="popover-action" data-act="name">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.39 4.84L20 7.6l-4 3.89.94 5.51L12 14.77l-4.94 2.23L8 11.49 4 7.6l5.61-.76z"/></svg>
+      Name this version
+    </div>
+    <div class="popover-action" data-act="copy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>
+      Copy link
+    </div>
     <div class="popover-action" data-act="duplicate">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       Duplicate
@@ -1381,6 +1389,26 @@ function openItemPopover(anchor, item) {
     closeItemPopover();
     if (act === 'restore') {
       restoreVersion(item);
+    } else if (act === 'name') {
+      const cur = item.named || '';
+      const name = window.prompt('Name this version', cur || 'Untitled version');
+      if (name && name.trim()) {
+        item.named = name.trim();
+        if (!item.version) {
+          const used = versionHistory.flatMap(g => g.items).filter(i => i.version).map(i => parseInt(i.version.replace('v',''),10));
+          const next = (used.length ? Math.max(...used) : 0) + 1;
+          item.version = 'v' + next;
+        }
+        renderHistoryBody();
+        showRestoreToast(`Saved as "${item.named}"`);
+      }
+    } else if (act === 'copy') {
+      const url = `${location.origin}${location.pathname}#version=${encodeURIComponent((item.time || '') + '-' + (item.desc || '').slice(0,30))}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => showRestoreToast('Link copied to clipboard'));
+      } else {
+        showRestoreToast('Link copied to clipboard');
+      }
     }
   }));
 }
