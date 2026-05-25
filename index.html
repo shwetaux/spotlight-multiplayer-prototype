@@ -378,7 +378,7 @@
     position:absolute; inset:0; z-index:85; pointer-events:auto;
     background:rgba(0,0,0,0.04);
   }
-  body.readonly-mode .canvas { pointer-events:none; filter:saturate(0.85); }
+  body.readonly-mode .canvas { pointer-events:auto; }
   body.readonly-mode .subbar .icon-btn { opacity:0.4; cursor:not-allowed; pointer-events:none; }
   body.readonly-mode .subbar .icon-btn.ro-enabled { opacity:1; cursor:pointer; pointer-events:auto; }
   body.readonly-mode .subbar .ro-disabled-wrap { pointer-events:auto; }
@@ -736,9 +736,20 @@
   .history-item.viewing { background:rgba(59,130,246,.10); }
   .history-item.viewing::before { display:none; }
   /* Hide descriptive clutter — keep handlers + data intact */
-  .history-item .kind-pill,
-  .history-item .named-pill,
+  .history-item .kind-pill:not(.named-pill),
   .history-item .item-actor-name { display:none; }
+  .history-item .item-named-row { margin-top:4px; }
+  .history-item .named-pill {
+    display:inline-flex; align-items:baseline; gap:6px;
+    margin-left:0; padding:3px 9px; border-radius:10px;
+    background:#d4f5e2; border:none;
+    color:#176149; font-size:12px; font-weight:500;
+    text-transform:none; letter-spacing:0;
+  }
+  .history-item .named-pill .named-ver {
+    background:none; color:#3d8b6b; padding:0;
+    font-size:11px; font-weight:500;
+  }
   .history-item .item-desc {
     font-size:13px; color:#6a6a6a; margin-top:2px; line-height:1.35;
     white-space:normal;
@@ -762,7 +773,7 @@
   }
   /* Smaller, softer actor avatar */
   .item-avatar { width:30px; height:30px; }
-  .item-avatar svg { width:14px; height:14px; }
+  .item-avatar svg { width:20px; height:20px; }
   .item-avatar.actor-data { background:#ececef; color:#5a5a5a; }
   .item-avatar.actor-automation,
   .item-avatar.actor-llm {
@@ -1425,7 +1436,7 @@ function renderHistoryBody() {
       // Content
       const content = document.createElement('div');
       content.className = 'item-content';
-      const namedPill = it.named ? `<span class="kind-pill named-pill" title="Named version">★ <span class="named-ver">${escapeHtml(it.version || '')}</span>${escapeHtml(it.named)}</span>` : '';
+      const namedPill = it.named ? `<span class="kind-pill named-pill" title="Named version">${escapeHtml(it.named)} <span class="named-ver">${escapeHtml(it.version || '')}</span></span>` : '';
       let actorName = '';
       if (it.actor === 'user') {
         const u = it.actorId === 'you' ? currentUser : users.find(x => x.id === it.actorId);
@@ -1437,9 +1448,9 @@ function renderHistoryBody() {
         <div class="item-time-row">
           <span class="item-time">${it.time}</span>
           ${actorName ? `<span class="item-actor-inline">${escapeHtml(actorName)}</span>` : ''}
-          ${namedPill}
         </div>
         <div class="item-actor-name">${escapeHtml(actorName)}</div>
+        ${namedPill ? `<div class="item-named-row">${namedPill}</div>` : ''}
         <div class="item-desc">${it.desc}</div>
         ${it.chat ? `<div class="item-extra"><span class="item-chat-link" data-chat="1">${chatLinkSvg()} View in chat</span></div>` : ''}
       `;
@@ -2098,12 +2109,7 @@ function enterReadOnlyMode(item) {
     attachRoTooltip(btn, 'Not available in read-only mode. Duplicate this graph to make changes.');
   });
 
-  // Canvas overlay to absorb pointer events
-  if (!canvasLockOverlay) {
-    canvasLockOverlay = document.createElement('div');
-    canvasLockOverlay.className = 'canvas-lock-overlay';
-    main.appendChild(canvasLockOverlay);
-  }
+  // Canvas overlay removed — canvas and drawers are interactive in read-only mode
 
   // Slim info banner below the subbar (lives inside .main, which sits below subbar)
   if (!readonlyBanner) {
@@ -2114,14 +2120,10 @@ function enterReadOnlyMode(item) {
   readonlyBanner.innerHTML = `
     <button id="rbRestoreBtn" class="primary">Restore this version</button>
     <button id="rbExitBtn">Back to current version</button>
-    <button id="rbCloseBtn" class="rb-close" title="Close">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
-    </button>
   `;
   requestAnimationFrame(() => readonlyBanner.classList.add('show'));
   readonlyBanner.querySelector('#rbRestoreBtn').addEventListener('click', () => restoreVersion(item));
   readonlyBanner.querySelector('#rbExitBtn').addEventListener('click', exitReadOnlyMode);
-  readonlyBanner.querySelector('#rbCloseBtn').addEventListener('click', exitReadOnlyMode);
 
   if (historyDrawer) renderHistoryBody(); // re-render to highlight viewing item
   updateGraphNameLabel();
@@ -2467,11 +2469,6 @@ document.addEventListener('mousedown', (e) => {
   if (filterMenu && !filterMenu.contains(e.target) && !historyDrawer.querySelector('#historyFilterBtn').contains(e.target)) {
     closeFilterMenu();
   }
-  if (!historyDrawer) return;
-  if (historyDrawer.contains(e.target)) return;
-  if (document.getElementById('savedLabel').contains(e.target)) return;
-  if (readonlyBanner && readonlyBanner.contains(e.target)) return;
-  closeHistory();
 });
 
 // ============== SCENE CONTROLLER ==============
