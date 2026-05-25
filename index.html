@@ -29,9 +29,9 @@
 
   /* Sub toolbar (second row) */
   .subbar { height:48px; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 20px; gap:12px; background:#fff; position:relative; z-index:29; }
-  .graph-name { display:flex; align-items:center; gap:6px; font-size:14px; color:#1a1a1a; cursor:pointer; padding:6px 8px; border-radius:6px; }
-  .graph-name:hover { background:#f5f5f5; }
-  .graph-name svg { width:12px; height:12px; opacity:.6; }
+  .graph-name { display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:500; color:#1a1a1a; cursor:pointer; padding:7px 12px 7px 14px; border-radius:8px; border:1px solid var(--border); background:#fff; transition:background .12s, border-color .12s, box-shadow .12s; }
+  .graph-name:hover { background:#fafafa; border-color:#d0d0d0; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .graph-name svg { width:12px; height:12px; opacity:.7; }
   .subbar-right { margin-left:auto; display:flex; align-items:center; gap:6px; }
   .saved { font-size:13px; color:#8a8a8a; margin-right:8px; cursor:pointer; padding:4px 8px 4px 6px; border-radius:6px; transition:background .12s, color .12s; display:inline-flex; align-items:center; gap:10px; }
   .saved svg { width:22px; height:22px; opacity:.85; }
@@ -63,6 +63,7 @@
   .avatar-group.pulse { box-shadow:0 0 0 0 rgba(255,91,46,.6); animation:pulse 1.4s infinite; }
   @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(255,91,46,.6);} 70%{box-shadow:0 0 0 12px rgba(255,91,46,0);} 100%{box-shadow:0 0 0 0 rgba(255,91,46,0);} }
   .saved.pulse { border-radius:20px; box-shadow:0 0 0 0 rgba(255,91,46,.6); animation:pulse 1.4s infinite; }
+  .graph-name.pulse { box-shadow:0 0 0 0 rgba(255,91,46,.6); animation:pulse 1.4s infinite; }
 
   /* Top "you" section in panel */
   .panel-you { display:flex; align-items:center; gap:12px; padding:14px; border-bottom:1px solid var(--border); }
@@ -405,12 +406,12 @@
   .kind-pill.kind-det { background:#eef1f5; color:#5a6478; }
   .kind-pill.kind-ai { background:#fde7d6; color:#b54a18; }
   .kind-pill.named-pill {
-    background:#f3edff; color:#5a3aaa; text-transform:none; letter-spacing:0;
+    background:#f1f2f5; color:#3f4658; text-transform:none; letter-spacing:0;
     font-weight:600;
   }
   .named-pill .named-ver {
     display:inline-flex; align-items:center;
-    background:#5a3aaa; color:#fff;
+    background:#5a6478; color:#fff;
     padding:1px 5px; border-radius:6px;
     font-size:9px; font-weight:700;
     margin-right:5px; letter-spacing:.3px;
@@ -617,6 +618,40 @@
 
   .history-footer { padding:10px 16px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); }
   @keyframes panelIn { from { opacity:0; transform:scale(0.95) translateY(-4px); } to { opacity:1; transform:scale(1) translateY(0); } }
+
+  /* Version picker (graph-name dropdown) */
+  .version-picker { position:fixed; min-width:360px; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,0,0,.14); z-index:200; padding:6px; animation:panelIn .14s ease-out; transform-origin:top left; }
+  .vp-option { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:6px; cursor:pointer; font-size:13px; color:#1a1a1a; }
+  .vp-option:hover { background:#f5f5f5; }
+  .vp-check { width:16px; flex-shrink:0; color:#1a1a1a; display:flex; align-items:center; justify-content:center; }
+  .vp-check svg { width:14px; height:14px; }
+  .vp-name { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }
+  .vp-name .vp-text { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vp-option.active .vp-name .vp-text { font-weight:600; }
+  .vp-name .kind-pill.named-pill { font-size:12px; padding:4px 10px; gap:5px; border-radius:12px; }
+  .vp-name .named-pill .named-ver { font-size:10px; padding:1px 5px; border-radius:4px; }
+  .vp-name .named-pill .vp-star { width:11px; height:11px; }
+  .vp-current-text { font-size:13px; color:#1a1a1a; font-weight:500; }
+  .vp-option.active .vp-current-text { font-weight:600; }
+  .vp-actor { font-size:11px; color:#3a3a3a; background:#f0f0f0; padding:2px 8px; border-radius:10px; font-weight:500; }
+  .vp-date { font-size:12px; color:#8a8a8a; white-space:nowrap; min-width:46px; text-align:right; }
+  .vp-edit { width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:4px; color:#5a5a5a; }
+  .vp-edit:hover { background:#ececec; color:#1a1a1a; }
+  .vp-edit svg { width:13px; height:13px; }
+  body.readonly-mode .graph-name { cursor:pointer; pointer-events:auto; }
+  .vp-option { position:relative; }
+  .vp-row-arrow { width:14px; flex-shrink:0; color:#8a8a8a; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .12s; margin-left:2px; }
+  .vp-row-arrow svg { width:12px; height:12px; }
+  .vp-option:hover .vp-row-arrow, .vp-option.submenu-open .vp-row-arrow { opacity:1; color:#3a3a3a; }
+  .vp-option.submenu-open { background:#f5f5f5; }
+  .vp-submenu { position:fixed; min-width:200px; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 10px 28px rgba(0,0,0,.14); z-index:201; padding:6px; animation:panelIn .12s ease-out; }
+  .vp-sub-item { display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:13px; color:#1a1a1a; }
+  .vp-sub-item:hover, .vp-sub-item.submenu-open { background:#f5f5f5; }
+  .vp-sub-icon { width:18px; height:18px; display:flex; align-items:center; justify-content:center; color:#3a3a3a; flex-shrink:0; }
+  .vp-sub-icon svg { width:16px; height:16px; }
+  .vp-sub-label { flex:1; }
+  .vp-sub-arrow { color:#8a8a8a; display:flex; align-items:center; justify-content:center; }
+  .vp-sub-arrow svg { width:12px; height:12px; }
   .panel-header { padding:12px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
   .panel-title { font-size:13px; font-weight:600; }
   .panel-toggle { background:#1a1a1a; color:#fff; border:none; padding:4px 10px; border-radius:12px; font-size:11px; cursor:pointer; }
@@ -699,7 +734,7 @@
     </div>
   </div>
   <div class="subbar">
-    <div class="graph-name">Operation Sundial — BTC ransom trace <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+    <div class="graph-name" id="graphNameBtn"><span id="graphNameLabel">Operation Sundial — BTC ransom trace</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
     <span class="readonly-pill" id="readonlyPill">Read only</span>
     <span class="asof-chip" id="asofChip">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -1113,12 +1148,12 @@ const versionHistory = [
     { time:'1:30 PM',  desc:'LIFO traced 12 hops from Coinbase deposit',                     actor:'automation', actorId:'you' },
     { time:'11:30 AM', desc:'Summarized fund flow into Helix Mixer',                         actor:'llm',        actorId:'you',  chat:true },
     { time:'10:48 AM', desc:'2 clusters attributed to Binance Hot Wallet 14',                actor:'data' },
-    { time:'9:12 AM',  desc:'Added 4 wallets to "Suspect cluster A"',                        actor:'user',       actorId:'tom',  named:'Before adding cluster A', version:'v2' },
+    { time:'9:12 AM',  desc:'Added 4 wallets to "Suspect cluster A"',                        actor:'user',       actorId:'tom',  named:'Before adding cluster A', version:'v3' },
     { time:'8:04 AM',  desc:'Auto-saved layout changes',                                     actor:'user',       actorId:'you',  autoSaved:true },
   ]},
   { group:'Yesterday', items: [
     { time:'6:14 PM',  desc:'Renamed "Helix Mixer" terminal node',                           actor:'user',       actorId:'adam' },
-    { time:'4:32 PM',  desc:'Tagged 6 counterparties as "High risk"',                        actor:'user',       actorId:'sara', named:'Pre-attorney review', version:'v3' },
+    { time:'4:32 PM',  desc:'Tagged 6 counterparties as "High risk"',                        actor:'user',       actorId:'sara', named:'Pre-attorney review', version:'v2' },
     { time:'3:10 PM',  desc:'Drafted narrative: "Peel chain pattern detected"',              actor:'llm',        actorId:'you',  chat:true },
     { time:'1:48 PM',  desc:'Peel chain workflow expanded 8 outbound hops',                  actor:'automation', actorId:'mike' },
     { time:'11:08 AM', desc:'Refreshed balances for 27 addresses',                           actor:'data' },
@@ -1982,6 +2017,7 @@ function enterReadOnlyMode(item) {
   readonlyBanner.querySelector('#rbExitBtn').addEventListener('click', exitReadOnlyMode);
 
   if (historyDrawer) renderHistoryBody(); // re-render to highlight viewing item
+  updateGraphNameLabel();
 }
 
 function formatAsOf(groupLabel, time) {
@@ -2032,6 +2068,7 @@ function exitReadOnlyMode() {
   }
   if (canvasLockOverlay) { canvasLockOverlay.remove(); canvasLockOverlay = null; }
   if (historyDrawer) renderHistoryBody();
+  updateGraphNameLabel();
 }
 
 function restoreVersion(item) {
@@ -2062,6 +2099,260 @@ function showRestoreToast(msg) {
   setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 2400);
   setTimeout(() => t.remove(), 2800);
 }
+// ============== VERSION PICKER (graph-name dropdown) ==============
+const PROJECT_NAME = 'Operation Sundial — BTC ransom trace';
+let versionPicker = null;
+
+function getNamedVersions() {
+  const out = [];
+  versionHistory.forEach(grp => {
+    grp.items.forEach(it => {
+      if (it.named) out.push({ ...it, groupLabel: grp.group });
+    });
+  });
+  return out;
+}
+
+function formatVersionDate(groupLabel) {
+  if (groupLabel === 'Today') return 'May 20';
+  if (groupLabel === 'Yesterday') return 'May 19';
+  const m = groupLabel.match(/^([A-Za-z]+)\s+(\d+)/);
+  if (m) return `${m[1]} ${m[2]}`;
+  return groupLabel;
+}
+
+function actorBadgeLabel(item) {
+  if (item.actor === 'user') return 'User';
+  if (item.actor === 'llm' || item.actor === 'automation') return 'Agent';
+  return 'Data';
+}
+
+function updateGraphNameLabel() {
+  const label = document.getElementById('graphNameLabel');
+  if (!label) return;
+  label.textContent = (viewingVersion && viewingVersion.named) ? viewingVersion.named : PROJECT_NAME;
+}
+
+// SVG icons used in the picker + submenus
+const VP_ICONS = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  duplicate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+  export: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  chevronRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+};
+
+// Submenu state (delayed open/close like native menus)
+let vpSubmenuOpenTimer = null;
+let vpSubmenuCloseTimer = null;
+let vpActiveSubmenus = []; // stack: [{row, sub}]
+
+function vpCancelTimers() {
+  if (vpSubmenuOpenTimer) { clearTimeout(vpSubmenuOpenTimer); vpSubmenuOpenTimer = null; }
+  if (vpSubmenuCloseTimer) { clearTimeout(vpSubmenuCloseTimer); vpSubmenuCloseTimer = null; }
+}
+
+function vpCloseSubmenusFrom(level) {
+  // close every submenu at or deeper than `level`
+  while (vpActiveSubmenus.length > level) {
+    const top = vpActiveSubmenus.pop();
+    top.row.classList.remove('submenu-open');
+    top.sub.remove();
+  }
+}
+
+function vpScheduleClose(level) {
+  if (vpSubmenuCloseTimer) clearTimeout(vpSubmenuCloseTimer);
+  vpSubmenuCloseTimer = setTimeout(() => vpCloseSubmenusFrom(level), 220);
+}
+
+function vpBuildSubmenu(items) {
+  const sub = document.createElement('div');
+  sub.className = 'vp-submenu';
+  items.forEach(it => {
+    const el = document.createElement('div');
+    el.className = 'vp-sub-item';
+    el.dataset.act = it.act || '';
+    el.innerHTML = `
+      <div class="vp-sub-icon">${it.icon || ''}</div>
+      <div class="vp-sub-label">${escapeHtml(it.label)}</div>
+      ${it.children ? `<div class="vp-sub-arrow">${VP_ICONS.chevronRight}</div>` : ''}
+    `;
+    el.__children = it.children || null;
+    el.__act = it.act;
+    sub.appendChild(el);
+  });
+  return sub;
+}
+
+function vpPositionSubmenu(sub, anchorRect) {
+  document.body.appendChild(sub);
+  const sr = sub.getBoundingClientRect();
+  let left = anchorRect.right + 6;
+  let top = anchorRect.top - 6;
+  if (left + sr.width > window.innerWidth - 8) left = Math.max(8, anchorRect.left - sr.width - 6);
+  if (top + sr.height > window.innerHeight - 8) top = Math.max(8, window.innerHeight - sr.height - 8);
+  sub.style.left = left + 'px';
+  sub.style.top = top + 'px';
+}
+
+function vpOpenSubmenu(row, level, contextItem) {
+  vpCancelTimers();
+  vpCloseSubmenusFrom(level); // close any peers/deeper
+  const items = [
+    { act:'rename',    label:'Rename',    icon:VP_ICONS.pencil },
+    { act:'duplicate', label:'Duplicate', icon:VP_ICONS.duplicate },
+    { act:'share',     label:'Share',     icon:VP_ICONS.share },
+    { act:'export',    label:'Export',    icon:VP_ICONS.export,
+      children:[
+        { act:'export-pdf',  label:'PDF',  icon:VP_ICONS.export },
+        { act:'export-png',  label:'PNG',  icon:VP_ICONS.export },
+        { act:'export-json', label:'JSON', icon:VP_ICONS.export },
+      ]
+    },
+  ];
+  const sub = vpBuildSubmenu(items);
+  vpPositionSubmenu(sub, row.getBoundingClientRect());
+  row.classList.add('submenu-open');
+  vpActiveSubmenus.push({ row, sub, level });
+
+  sub.addEventListener('mouseenter', vpCancelTimers);
+  sub.addEventListener('mouseleave', () => vpScheduleClose(level));
+
+  sub.querySelectorAll('.vp-sub-item').forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      vpCancelTimers();
+      // close any deeper submenus when moving between peer items
+      vpCloseSubmenusFrom(level + 1);
+      if (item.__children) {
+        vpSubmenuOpenTimer = setTimeout(() => {
+          const child = vpBuildSubmenu(item.__children);
+          vpPositionSubmenu(child, item.getBoundingClientRect());
+          item.classList.add('submenu-open');
+          vpActiveSubmenus.push({ row: item, sub: child, level: level + 1 });
+          child.addEventListener('mouseenter', vpCancelTimers);
+          child.addEventListener('mouseleave', () => vpScheduleClose(level + 1));
+          child.querySelectorAll('.vp-sub-item').forEach(ci => {
+            ci.addEventListener('click', () => vpHandleAction(ci.__act || ci.dataset.act, contextItem));
+          });
+        }, 160);
+      }
+    });
+    item.addEventListener('click', (e) => {
+      if (item.__children) { e.stopPropagation(); return; }
+      vpHandleAction(item.__act || item.dataset.act, contextItem);
+    });
+  });
+}
+
+function vpHandleAction(act, contextItem) {
+  vpCloseSubmenusFrom(0);
+  closeVersionPicker();
+  const name = contextItem === 'current' ? 'Current' : (contextItem.named || 'version');
+  const pretty = ({
+    'rename':'Rename', 'duplicate':'Duplicate', 'share':'Share',
+    'export-pdf':'Export as PDF', 'export-png':'Export as PNG', 'export-json':'Export as JSON',
+  })[act] || act;
+  showRestoreToast(`${pretty} — "${name}"`);
+}
+
+function vpAttachRowHover(row, contextItem) {
+  row.addEventListener('mouseenter', () => {
+    vpCancelTimers();
+    // close peer submenus (anything beyond level 0)
+    vpCloseSubmenusFrom(0);
+    vpSubmenuOpenTimer = setTimeout(() => vpOpenSubmenu(row, 0, contextItem), 200);
+  });
+  row.addEventListener('mouseleave', () => {
+    if (vpSubmenuOpenTimer) { clearTimeout(vpSubmenuOpenTimer); vpSubmenuOpenTimer = null; }
+    vpScheduleClose(0);
+  });
+}
+
+function openVersionPicker() {
+  closeVersionPicker();
+  const btn = document.getElementById('graphNameBtn');
+  versionPicker = document.createElement('div');
+  versionPicker.className = 'version-picker';
+
+  const named = getNamedVersions();
+  const activeNamed = (viewingVersion && viewingVersion.named) ? viewingVersion : null;
+
+  // "Current" entry — represents the live working state
+  const currentRow = document.createElement('div');
+  currentRow.className = 'vp-option' + (activeNamed ? '' : ' active');
+  currentRow.innerHTML = `
+    <div class="vp-check">${activeNamed ? '' : VP_ICONS.check}</div>
+    <div class="vp-name"><span class="vp-current-text">Current</span></div>
+    <span class="vp-actor">User</span>
+    <span class="vp-date">Now</span>
+    <div class="vp-row-arrow">${VP_ICONS.chevronRight}</div>
+  `;
+  currentRow.addEventListener('click', (e) => {
+    if (e.target.closest('.vp-row-arrow')) { e.stopPropagation(); return; }
+    closeVersionPicker();
+    if (viewingVersion) exitReadOnlyMode();
+  });
+  vpAttachRowHover(currentRow, 'current');
+  versionPicker.appendChild(currentRow);
+
+  named.forEach(it => {
+    const isActive = activeNamed && activeNamed.time === it.time && activeNamed.desc === it.desc;
+    const row = document.createElement('div');
+    row.className = 'vp-option' + (isActive ? ' active' : '');
+    row.innerHTML = `
+      <div class="vp-check">${isActive ? VP_ICONS.check : ''}</div>
+      <div class="vp-name">
+        <span class="kind-pill named-pill" title="Named version">
+          <svg class="vp-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.39 4.84L20 7.6l-4 3.89.94 5.51L12 14.77l-4.94 2.23L8 11.49 4 7.6l5.61-.76z"/></svg>
+          <span class="named-ver">${escapeHtml(it.version || '')}</span>
+          <span class="vp-text">${escapeHtml(it.named)}</span>
+        </span>
+      </div>
+      <span class="vp-actor">${actorBadgeLabel(it)}</span>
+      <span class="vp-date">${escapeHtml(formatVersionDate(it.groupLabel))}</span>
+      <div class="vp-row-arrow">${VP_ICONS.chevronRight}</div>
+    `;
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.vp-row-arrow')) { e.stopPropagation(); return; }
+      closeVersionPicker();
+      if (isActive) return;
+      enterReadOnlyMode(it);
+    });
+    vpAttachRowHover(row, it);
+    versionPicker.appendChild(row);
+  });
+
+  versionPicker.addEventListener('mouseenter', vpCancelTimers);
+  versionPicker.addEventListener('mouseleave', () => vpScheduleClose(0));
+
+  document.body.appendChild(versionPicker);
+  const r = btn.getBoundingClientRect();
+  versionPicker.style.top = (r.bottom + 6) + 'px';
+  versionPicker.style.left = r.left + 'px';
+}
+
+function closeVersionPicker() {
+  vpCancelTimers();
+  vpCloseSubmenusFrom(0);
+  if (versionPicker) { versionPicker.remove(); versionPicker = null; }
+}
+
+document.getElementById('graphNameBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  versionPicker ? closeVersionPicker() : openVersionPicker();
+});
+
+document.addEventListener('mousedown', (e) => {
+  if (!versionPicker) return;
+  if (versionPicker.contains(e.target)) return;
+  if (document.getElementById('graphNameBtn').contains(e.target)) return;
+  // Don't close when clicking inside any open submenu
+  if (vpActiveSubmenus.some(s => s.sub.contains(e.target))) return;
+  closeVersionPicker();
+});
+
 document.getElementById('savedLabel').addEventListener('click', (e) => {
   e.stopPropagation();
   historyDrawer ? closeHistory() : openHistory();
@@ -2183,6 +2474,39 @@ const scenes = [
       if (chatDrawer) closeChatDrawer();
       if (!historyDrawer) openHistory();
     }
+  },
+  {
+    text: "Need to switch versions quickly? Click the graph-name chip in the sub-bar — it's a dropdown of named versions (Current, V3, V2, V1) you can jump between without opening the full log.",
+    enter() {
+      if (chatDrawer) closeChatDrawer();
+      if (viewingVersion) exitReadOnlyMode();
+      if (historyDrawer) closeHistory();
+      closeVersionPicker();
+      document.getElementById('graphNameBtn').classList.add('pulse');
+      setTimeout(() => openVersionPicker(), 400);
+    },
+    exit() {
+      document.getElementById('graphNameBtn').classList.remove('pulse');
+      closeVersionPicker();
+    }
+  },
+  {
+    text: "Hover any row in the picker to reveal more actions — Rename, Duplicate, Share, Export. Selecting a past version drops you into read-only mode; pick 'Current' to come back.",
+    enter() {
+      if (chatDrawer) closeChatDrawer();
+      if (viewingVersion) exitReadOnlyMode();
+      if (historyDrawer) closeHistory();
+      if (!versionPicker) openVersionPicker();
+      // simulate hover on the first named version to surface the submenu
+      setTimeout(() => {
+        const namedRow = versionPicker && versionPicker.querySelectorAll('.vp-option')[1];
+        if (namedRow) {
+          vpCancelTimers();
+          vpOpenSubmenu(namedRow, 0, getNamedVersions()[0]);
+        }
+      }, 350);
+    },
+    exit() { closeVersionPicker(); }
   },
   {
     text: "Use the filter pill (top-right of the drawer) to narrow the list — show only your edits, only Automations, only LLM actions, or toggle auto-saved versions on/off.",
