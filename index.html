@@ -126,6 +126,42 @@
   .node.selected-by-user { box-shadow:0 0 0 3px var(--user-color,#3b82f6); }
   .edge-label { position:absolute; font-size:11px; color:#5a5a5a; transform:translate(-50%,-50%); pointer-events:none; background:transparent; padding:1px 4px; }
 
+  .ai-region {
+    position:absolute;
+    background:rgba(99,102,241,0.08);
+    border:1px solid rgba(99,102,241,0.35);
+    border-radius:14px;
+    pointer-events:none;
+    transition:opacity .35s ease;
+  }
+  .ai-region.tt-hidden { opacity:0; }
+  .ai-region-chip {
+    position:absolute;
+    top:-22px; left:18px;
+    display:inline-flex; align-items:center; gap:10px;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:5px 14px 5px 5px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    font-size:13px; font-weight:500; color:#1f1f1f;
+    white-space:nowrap;
+  }
+  .ai-region-chip .ai-avatar-wrap { position:relative; flex-shrink:0; }
+  .ai-region-chip .ai-avatar {
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(135deg, #ff8a3d 0%, #ff5b2e 60%, #e6356b 100%);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ai-region-chip .ai-avatar svg { width:20px; height:20px; display:block; }
+  .ai-region-chip .ai-attrib {
+    position:absolute; right:-3px; bottom:-3px;
+    width:16px; height:16px; border-radius:50%;
+    border:2px solid #fff;
+    background-size:cover; background-position:center;
+  }
+
   .cursor { position:absolute; pointer-events:none; z-index:100; transition:transform 1.4s cubic-bezier(0.22,1,0.36,1), opacity .35s; opacity:0; will-change:transform; }
   .cursor.visible { opacity:1; }
   .cursor svg { display:block; }
@@ -1054,10 +1090,10 @@ const nodes = [
   { id:'n0', x:600,  y:950,  label:'Coinbase.com' },
   { id:'n1', x:1000, y:780,  label:'0xCd5f8...e5FC4' },
   { id:'n2', x:1000, y:950,  label:'0xN283j...k39du' },
-  { id:'n3', x:1000, y:1120, label:'0x4ll39...993j3' },
+  { id:'n3', x:1000, y:1120, label:'0x4ll39...993j3', addedByAi:true },
   { id:'n4', x:1400, y:780,  label:'0x00s34...22kj3' },
   { id:'n5', x:1400, y:950,  label:'0xDm032...kkdID' },
-  { id:'n6', x:1400, y:1120, label:'0x33Kls...09dk3' },
+  { id:'n6', x:1400, y:1120, label:'0x33Kls...09dk3', addedByAi:true },
   { id:'n7', x:1800, y:950,  label:'Helix Mixer', sublabel:'Mixing', mixer:true },
 ];
 const edges = [
@@ -1147,6 +1183,64 @@ function getNode(id) { return nodes.find(n => n.id === id); }
     canvas.appendChild(el);
   });
 })();
+
+// ============== AI-ADDED NODE REGIONS (visual only) ==============
+(function renderAiRegions() {
+  const aiSet = new Set(nodes.filter(n => n.addedByAi).map(n => n.id));
+  if (!aiSet.size) return;
+  // adjacency limited to edges between AI-added nodes
+  const adj = {};
+  edges.forEach(e => {
+    if (aiSet.has(e.from) && aiSet.has(e.to)) {
+      (adj[e.from] = adj[e.from] || []).push(e.to);
+      (adj[e.to] = adj[e.to] || []).push(e.from);
+    }
+  });
+  // connected components = clusters
+  const seen = new Set();
+  const clusters = [];
+  aiSet.forEach(start => {
+    if (seen.has(start)) return;
+    const stack = [start], comp = [];
+    while (stack.length) {
+      const id = stack.pop();
+      if (seen.has(id)) continue;
+      seen.add(id); comp.push(id);
+      (adj[id] || []).forEach(nb => { if (!seen.has(nb)) stack.push(nb); });
+    }
+    clusters.push(comp);
+  });
+  const nodeR = 28, padX = 40, padTop = 48, padBottom = 52;
+  clusters.forEach(ids => {
+    const ns = ids.map(getNode);
+    const minX = Math.min(...ns.map(n => n.x)) - nodeR - padX;
+    const maxX = Math.max(...ns.map(n => n.x)) + nodeR + padX;
+    const minY = Math.min(...ns.map(n => n.y)) - nodeR - padTop;
+    const maxY = Math.max(...ns.map(n => n.y)) + nodeR + padBottom;
+    const region = document.createElement('div');
+    region.className = 'ai-region';
+    region.dataset.nodeIds = ids.join(',');
+    region.style.left = minX + 'px';
+    region.style.top = minY + 'px';
+    region.style.width = (maxX - minX) + 'px';
+    region.style.height = (maxY - minY) + 'px';
+    const aiSparkle = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 7 L11.6 10.4 L15 12 L11.6 13.6 L10 17 L8.4 13.6 L5 12 L8.4 10.4 Z"/><path d="M16 6 L16.8 7.7 L18.5 8.5 L16.8 9.3 L16 11 L15.2 9.3 L13.5 8.5 L15.2 7.7 Z"/><path d="M15.5 13.5 L16.1 14.5 L17 15 L16.1 15.5 L15.5 16.5 L14.9 15.5 L14 15 L14.9 14.5 Z"/></svg>`;
+    region.innerHTML = `<div class="ai-region-chip"><div class="ai-avatar-wrap"><div class="ai-avatar">${aiSparkle}</div><div class="ai-attrib" style="background-image:url('${currentUser.avatar}')"></div></div>Added by AI Agent</div>`;
+    canvas.insertBefore(region, edgesSvg);
+  });
+})();
+
+// Hide AI regions whose nodes are all hidden by timeline scrubbing
+function updateAiRegionsVisibility() {
+  document.querySelectorAll('.ai-region').forEach(region => {
+    const ids = (region.dataset.nodeIds || '').split(',').filter(Boolean);
+    const allHidden = ids.every(id => {
+      const n = document.querySelector(`.node[data-id="${id}"]`);
+      return !n || n.classList.contains('tt-hidden');
+    });
+    region.classList.toggle('tt-hidden', allHidden);
+  });
+}
 
 // ============== AVATARS ==============
 const avatarStack = document.getElementById('avatarStack');
@@ -2421,6 +2515,7 @@ function clearDiff() {
   document.querySelectorAll('.edge-label.tt-hidden').forEach(l => l.classList.remove('tt-hidden'));
   // Remove ghost-node DOM elements
   document.querySelectorAll('.ghost-node, .ghost-label').forEach(el => el.remove());
+  updateAiRegionsVisibility();
 }
 function hiddenAtItem(item) {
   if (allVersions.length === 0) buildAllVersions();
@@ -2451,6 +2546,7 @@ function applyDiffForItem(item) {
     const lbl = document.querySelector(`.edge-label[data-id="${id}"]`);
     if (lbl) lbl.classList.add('tt-hidden');
   });
+  updateAiRegionsVisibility();
   const delta = versionDeltas[item.desc];
   if (!delta) return;
   const tag = (sel, cls, ids) => (ids||[]).forEach(id => {
